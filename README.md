@@ -27,19 +27,19 @@
 <br />
 
 ## 프로젝트 기능
-프로젝트의 주요 기능에 대한 설명입니다.  
-
 이번 프로젝트에서 사용된 기술 스택은 다음과 같습니다.  
-> Language - JAVA 1.8
-> UI - JSP, JavaScript, CSS, BootStrap
-> Framework - Spring Framework 5.0.7, Mybatis 3
-> Library - JSTL, JQuery
-> API - 카카오 결제 API
-> Database - MariaDB <br />
-> IDE - Eclipse <br />
-> Build - Maven
+> Language - JAVA 1.8  
+> UI - JSP, JavaScript, CSS, BootStrap  
+> Framework - Spring Framework 5.0.7, Mybatis 3  
+> Library - JSTL, JQuery  
+> API - 카카오 결제 API  
+> Database - MariaDB  
+> IDE - Eclipse  
+> Build - Maven  
 > VC - Git
 <br />
+
+다음은 프로젝트의 주요 기능에 대한 이미지 및 설명입니다.  
 <br />
 
 ### 메인
