@@ -4,8 +4,6 @@
 사용자는 포트폴리오를 구매할 수 있으며, 동시에 판매할 수 있습니다.  
 <br />
 <br />
-<br />
-<br />
 
 ## 메인
 ![portgit메인](https://user-images.githubusercontent.com/80952596/145715130-9482dbd0-6399-412e-8eed-e03eda8a5c9f.PNG)
