@@ -16,7 +16,7 @@ import com.spring.ex.portfolio.domain.PortRegVO;
 
 @Component("fileUtils") 
 public class FileUtils {
-	private static final String filePath = "C:\\mp\\file\\"; // 파일이 저장될 위치
+	private static final String filePath = System.getProperty("user.dir") + "\\mp"; // 파일이 저장될 위치
 
 	public List<Map<String, Object>> paseInsertFileInfo(PortRegVO portRegVO, 
 			MultipartHttpServletRequest mpRequest) throws Exception{

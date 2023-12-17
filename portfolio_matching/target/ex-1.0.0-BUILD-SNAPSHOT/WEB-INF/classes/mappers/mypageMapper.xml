@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mypageMapper">
+	<!-- 구매 내역 -->
+	<select id="pmPurchase_list" parameterType="com.spring.ex.member.domain.Criteria" resultType="com.spring.ex.deal.domain.Deal_PortVO">
+		SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY deal_id DESC) AS rnum FROM deal, portfolio WHERE deal_portfolio_id = portfolio_id AND deal_purUser = #{user_id}) p WHERE rnum BETWEEN #{rowStart} AND #{rowEnd} ORDER BY deal_id DESC;
+	</select>
+	
+	<!-- 구매 총 개수 -->
+	<select id="pmPurchaseListCount" resultType="int" parameterType="com.spring.ex.member.domain.Criteria">
+	<![CDATA[
+		SELECT COUNT(*) FROM deal, portfolio WHERE deal_portfolio_id = portfolio_id AND deal_purUser = #{user_id}
+	]]>
+	</select>
+	<!-- 구매 내역 - 구매 확정 기능 -->
+	<update id="pmPurchaseConfirm" parameterType="String">
+		UPDATE deal SET
+		deal_status = '구매 확정'
+		WHERE deal_id = #{deal_id};
+	</update>
+	
+	<!-- 후기 중복 확인 -->
+	<select id="reviewChk" parameterType="hashmap" resultType="int">
+		SELECT count(*) FROM review
+		WHERE review_portfolio_id = #{review_portfolio_id}
+		AND review_userId = #{user_id}
+	</select>
+	
+	<!-- 구매 내역 - 후기 작성 -->
+	<insert id="pmPurchaseReview">
+		INSERT INTO review(
+			review_portfolio_id,
+			review_userId,
+			review_rating,
+			review_title,
+			review_content
+		) VALUES (
+			#{review_portfolio_id},
+			#{review_userId},
+			#{review_rating},
+			#{review_title},
+			#{review_content}
+		)
+	</insert>
+	
+	
+	<!-- 리뷰전체 보기 -->
+	<select id="reviewlist" resultType="com.spring.ex.review.domain.ReviewVO">
+	SELECT * FROM review ORDER BY review_userId DESC
+    </select>
+	
+	
+	<!-- 리뷰삭제 하기 -->
+	<delete id = "reviewDelete">
+	DELETE FROM review WHERE review_id= #{review_id};
+	</delete>
+	
+	
+	<!-- 리뷰상세보기 -->
+	<select id = "selectReviewByCode" parameterType="com.spring.ex.review.domain.ReviewVO" resultType="com.spring.ex.review.domain.ReviewVO">
+	SELECT   review_id
+			   , review_portfolio_id
+			   , review_userId
+			   , review_rating
+			   , review_title
+			   , review_content
+			   , review_regDate
+		  FROM review
+		 WHERE review_id = #{review_id}
+		 </select>
+		 
+	<!-- 리뷰상세보기->원글이동 -->
+	<select id ="ReviewPort" parameterType="com.spring.ex.review.domain.ReviewPortVO" resultType="com.spring.ex.review.domain.ReviewPortVO">
+	SELECT *
+	FROM review, portfolio
+	WHERE review_portfolio_id = portfolio_id
+	AND portfolio_id = #{portfolio_id}
+
+	</select>
+	
+		 
+	<!-- 첨부파일 조회 -->
+	<select id="selectFileList" parameterType="int" resultType="hashMap">
+		SELECT file_id, file_org_name, round(file_size/1024, 1) AS file_size
+		FROM file
+		WHERE file_portfolio_id = #{file_portfolio_id}
+		AND file_del_GB = 'N'
+	</select>
+	
+	<!-- 첨부파일 다운 -->
+	<select id="selectFileInfo" parameterType="hashMap" resultType="hashMap">
+		SELECT file_stored_name, file_org_name
+		FROM file
+		WHERE file_id = #{file_id}
+	</select>
+	
+	<!-- 관심 상품 -->
+	<select id="pmInterestList" parameterType="com.spring.ex.member.domain.Criteria" resultType="com.spring.ex.portfolio.domain.PortfolioVO">
+		SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY scrap_id DESC) AS rnum FROM scrap, portfolio WHERE scrap_portfolio_id = portfolio_id AND scrap_userId = #{user_id}) p WHERE rnum BETWEEN #{rowStart} AND #{rowEnd} ORDER BY scrap_id DESC;
+	</select>
+	
+	<select id="pmInterestListCount" resultType="int" parameterType="com.spring.ex.member.domain.Criteria">
+		SELECT COUNT(*) FROM scrap, portfolio WHERE scrap_portfolio_id = portfolio_id AND scrap_userId = #{user_id} ORDER BY scrap_id DESC;
+	</select>
+	
+	<!-- 관심 상품 - 삭제 기능 -->
+	<delete id="pmInterestDelete">
+		DELETE FROM scrap
+		WHERE scrap_userId = #{scrap_userId}
+		AND scrap_portfolio_id = #{scrap_portfolio_id}
+	</delete>
+	
+	<!-- 문의 내역(구매) -->
+	<select id="pmInquiryList" parameterType="com.spring.ex.member.domain.Criteria" resultType="com.spring.ex.deal.domain.Deal_Port_InqVO">
+		SELECT * FROM (SELECT inquiry.*, portfolio.portfolio_title, portfolio.portfolio_Img, ROW_NUMBER() OVER(ORDER BY inq_id DESC) AS rnum FROM inquiry, portfolio WHERE portfolio_id = inq_portfolio_id AND inq_purUser = #{user_id}) p WHERE rnum BETWEEN #{rowStart} AND #{rowEnd} ORDER BY inq_id DESC;
+	</select>
+	
+	<select id="pmInquiryListCount" resultType="int" parameterType="com.spring.ex.member.domain.Criteria">
+	<![CDATA[
+		SELECT COUNT(*) FROM inquiry, portfolio WHERE portfolio_id = inq_portfolio_id AND inq_purUser = #{user_id} ORDER BY inq_id DESC
+	]]>
+	</select>
+	
+	<!-- 문의 내역(구매) - 문의 작성 기능 -->
+	<insert id="pmInquiryWrite">
+		INSERT INTO inquiry(
+			inq_deal_id,
+			inq_purUser,
+			inq_title,
+			inq_content
+		) VALUES (
+			#{inq_deal_id},
+			#{inq_purUser},
+			#{inq_title},
+			#{inq_content}
+		);
+	</insert>
+	
+	<!-- 문의 내역(구매) - 답변 읽기 기능1 -->
+	<select id="pmInquiryRead" parameterType="int" resultType="com.spring.ex.inquiry.domain.InquiryVO">
+		SELECT * FROM inquiry
+		WHERE inq_id = #{inq_id};
+	</select>
+	
+	<!-- 문의 내역(구매) - 답변 읽기 기능2 -->
+	<select id="pmAnswerRead" parameterType="int" resultType="com.spring.ex.inquiry.domain.AnswerVO">
+		SELECT * FROM answer
+		WHERE ans_inq_id = #{inq_id};
+	</select>
+	
+	<!-- 판매 중 -->
+
+	<select id="smSaleList" parameterType="com.spring.ex.member.domain.Criteria" resultType="com.spring.ex.portfolio.domain.PortfolioVO">
+		SELECT * FROM (SELECT *, ROW_NUMBER() OVER(ORDER BY portfolio_id DESC) AS rnum FROM portfolio WHERE portfolio_userId = #{user_id}) p WHERE rnum BETWEEN #{rowStart} AND #{rowEnd} ORDER BY portfolio_id DESC
+	</select>
+	
+	<!-- 판매 중 개수 -->
+	<select id="listCount" resultType="int" parameterType="com.spring.ex.member.domain.Criteria">
+	<![CDATA[
+		SELECT COUNT(portfolio_id) FROM portfolio WHERE portfolio_id > 0 AND portfolio_userId = #{user_id}
+	]]>
+
+	</select>
+	
+	<!-- 판매 중 - 삭제 기능 -->
+	<delete id="smSaleDelete">
+		DELETE FROM portfolio
+		WHERE portfolio_id = #{portfolio_id}
+	</delete>
+	
+	<!-- 거래 현황 -->
+	<select id="smDealList" parameterType="int" resultType="com.spring.ex.deal.domain.Deal_PortVO">
+		SELECT * FROM deal, portfolio
+		WHERE deal_portfolio_id = portfolio_id
+		AND portfolio_id = #{portfolio_id}
+		ORDER BY deal_id DESC;
+	</select>
+	
+	<!-- 거래 현황 - 작업 중으로 변경 -->
+	<update id="smDealWorking" parameterType="int">
+		UPDATE deal SET deal_status = '작업 중'
+		WHERE deal_id = #{deal_id};
+	</update>
+	
+	<!-- 거래 현황 - 작업 중으로 변경 -->
+	<update id="smDealComplete" parameterType="int">
+		UPDATE deal SET deal_status = '작업 완료'
+		WHERE deal_id = #{deal_id};
+	</update>
+	
+	<!-- 수익 현황 -->
+	<select id="smProfitList" parameterType="com.spring.ex.member.domain.Criteria" resultType="com.spring.ex.deal.domain.Deal_PortVO">
+		SELECT * FROM (SELECT deal.*, portfolio.portfolio_title, portfolio.portfolio_Img, ROW_NUMBER() OVER(ORDER BY deal_id DESC) AS rnum FROM deal, portfolio WHERE portfolio_id = deal_portfolio_id AND deal_saleUser = #{user_id} AND deal_status = '구매 확정') p WHERE rnum BETWEEN #{rowStart} AND #{rowEnd} ORDER BY deal_id DESC;
+	</select>
+	
+	<select id="smProfitListCount" parameterType="com.spring.ex.member.domain.Criteria" resultType="int">
+		SELECT COUNT(*) FROM deal, portfolio WHERE deal_portfolio_id = portfolio_id AND deal_saleUser = #{user_id} AND deal_status = '구매 확정' ORDER BY deal_date DESC;
+	</select>
+	
+	<select id="smProfitTotal" parameterType="string" resultType="com.spring.ex.deal.domain.DealVO">
+		SELECT deal_price FROM deal, portfolio WHERE deal_portfolio_id = portfolio_id AND deal_saleUser = #{user_id} AND deal_status = '구매 확정' ORDER BY deal_date DESC;
+	</select>
+	
+	<!-- 문의 내역(판매) -->
+	<select id="smInquiryList" parameterType="com.spring.ex.member.domain.Criteria" resultType="com.spring.ex.deal.domain.Deal_Port_InqVO">
+		SELECT * FROM (SELECT inquiry.*, portfolio.portfolio_title, portfolio.portfolio_Img, ROW_NUMBER() OVER(ORDER BY inq_id DESC) AS rnum FROM inquiry, portfolio WHERE portfolio_id = inq_portfolio_id AND portfolio_userId = #{user_id}) p WHERE rnum BETWEEN #{rowStart} AND #{rowEnd} ORDER BY inq_id DESC;
+	</select>
+	
+	<select id="smInquiryListCount" parameterType="com.spring.ex.member.domain.Criteria" resultType="int">
+		SELECT COUNT(*) FROM inquiry, portfolio WHERE portfolio_id = inq_portfolio_id AND portfolio_userId = #{user_id} ORDER BY inq_id DESC;
+	</select>
+	
+	<!-- 문의 내역(판매) - 답변 하기 -->
+	<select id="smInquiryRead" parameterType="int" resultType="com.spring.ex.inquiry.domain.InquiryVO">
+		SELECT * FROM inquiry
+		WHERE inq_id = #{inq_id};
+	</select>
+	
+	<!-- 문의 내역(판매) - 답변 여부 확인 -->
+	<select id="smAnswerChk" resultType="int">
+		SELECT count(*) FROM inquiry, answer
+		WHERE inq_id = ans_inq_id
+		AND inq_id = #{inq_id};
+	</select>
+	
+	<!-- 문의 내역(판매) - 답변 하기 기능 -->
+	<insert id="smAnswerWrite">
+		INSERT INTO answer(
+			ans_deal_id,
+			ans_inq_id,
+			ans_saleUser,
+			ans_content
+		) VALUES (
+			#{ans_deal_id},
+			#{ans_inq_id},
+			#{ans_saleUser},
+			#{ans_content}
+		);
+	</insert>
+	
+	<!-- 내 정보 수정 - 수정 기능 -->
+	<update id="userUpdate">
+		UPDATE user SET
+		user_name = #{user_name},
+		user_phone = #{user_phone},
+		user_email = #{user_email}
+		WHERE user_id = #{user_id}
+	</update>
+	
+	<!-- 내 정보 수정 - 비밀번호 수정 기능 -->
+	<update id="userPwUpdate">
+		UPDATE user SET
+		user_pw = #{user_pw}
+		WHERE user_id = #{user_id}
+	</update>
+	
+	<!-- 회원 탈퇴 - 탈퇴 기능 -->
+	<delete id="userDelete">
+		DELETE FROM USER
+		WHERE user_id = #{user_id}
+	</delete>
+	
+	<!-- 별점 총점 -->
+	<select id="totalRating" parameterType="int" resultType="double">
+		SELECT ROUND(AVG(review_rating),1) AS total_rating FROM review
+		WHERE review_portfolio_id = #{review_portfolio_id}
+		GROUP BY review_portfolio_id;
+	</select>
+</mapper>
