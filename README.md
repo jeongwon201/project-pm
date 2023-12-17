@@ -27,53 +27,69 @@
 ### 설치 방법
 
 윈도우:
-> Jdk 8 이상, Maven, MariaDB 가 필요합니다.
+> ```Jdk 8``` 이상, ```Maven```, ```MariaDB``` 가 필요합니다.
 1. Git Repository 를 Clone 하세요.
 > ```sh
 > git clone https://github.com/jeongwon201/project-pm.git
 > ```
 <br />
 
-2. application.properties 파일을 자신의 환경에 맞게 수정하세요.
-> 경로: ```src/main/resources/application.properties```
-> ```yaml
-> server.port=8000 # 8000 포트가 사용중이라면, 사용 중이지 않은 포트로 변경하세요.
-> 
-> #DB
-> spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-> spring.datasource.url=jdbc:mysql://127.0.0.1:3306/search?useSSL=false
-> spring.datasource.username={username} # 현재 사용중인 MySQL 사용자 username 으로 변경하세요.
-> spring.datasource.password={password} # 현재 사용중인 MySQL 사용자 password 으로 변경하세요.
-> 
-> #JPA
-> spring.jpa.database=mysql
-> spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
-> spring.jpa.hibernate.ddl-auto=update
-> spring.jpa.generate-ddl=true
-> spring.jpa.show-sql=true
-> spring.jpa.open-in-view=false
+2. ```root-context.xml``` 파일을 자신의 환경에 맞게 수정하세요.
+> 경로: portfolio_matching/src/main/webapp/WEB-INF/spring/```root-context.xml```
+> ```xml
+> <!-- MariaDB JDBC DataSource -->
+> <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+>   <property name="driverClassName" value="org.mariadb.jdbc.Driver" />
+>   <property name="url" value="jdbc:mariadb://127.0.0.1:3307/portfolio_matching" />
+>   <property name="username" value="{MariaDB Username}" /> <!-- 자신의 MariaDB Username 으로 입력하세요. -->
+>   <property name="password" value="{MariaDB Password}" /> <!-- 자신의 MariaDB Password 으로 입력하세요. -->
+> </bean>
 > ```
 <br />
 
-3. MySQL 에 데이터베이스를 추가하세요.
-> sql 폴더의 ```search.sql``` 파일을 MySQL 에서 실행하여 데이터베이스를 준비합니다.
+3. MariaDB 에 데이터베이스를 추가하세요.
+> sql 폴더의 ```pm.sql``` 파일을 MariaDB 에서 실행하여 데이터베이스를 준비합니다.
 <br />
 
-4. Gradle 을 이용하여 프로젝트를 빌드하세요.
+4. Maven 을 이용하여 프로젝트를 빌드하세요.
 > ```sh
-> cd 경로/search
-> gradle build
+> cd 경로/portfolio_matching
+> maven pakage
 > ```
 <br />
 
-5. 서버를 오픈하세요.
-> build/libs 폴더의 ```search-1.0.0.jar``` 파일을 원하는 디렉토리에 복사 후 다음 명령어를 이용하여 서버를 오픈하세요.
+5. Apache Tomcat 을 다운로드하세요.  
+> <a href="https://tomcat.apache.org/download-90.cgi">Apache Tomcat Download</a> 에 접속하여 zip 확장자 파일을 다운로드 후 압축을 해제합니다.  
+<br />
+
+6. Apahce Tomcat 의 서버 환경을 설정하세요.  
+> apache-tomcat-{version}/conf 폴더의 server.xml 을 자신의 환경에 맞게 수정합니다.  
 > 
+> 해당 부분을 찾아 본인이 원하는 포트 로 변경합니다.
 > ```sh
-> java -jar search-1.0.0.jar
+> <Connector port="원하는 포트" protocol="HTTP/1.1"
+>                connectionTimeout="20000"
+>                redirectPort="8443"
+>                maxParameterCount="1000"/>
 > ```
-> 
-> ```CTRL + C``` 을 두 번 키다운하여 서버를 종료할 수 있습니다.  
+> <br />
+>
+> Host 태그를 찾아 태그 내부에 다음을 추가합니다.  
+> ```sh
+> <Host ...>
+>   ...
+>   <Context path="/" docBase="ex" reloadable="false" />
+> </Host>
+> ```
+<br />
+
+7. WAR 파일을 Apache Tomcat 에 추가하세요.  
+> 앞서 2번에서 Maven 을 통해 빌드한 ```ex.war``` 파일을 apache-tomcat-{version}/webapps 폴더 내부에 추가합니다.  
+<br />
+
+7. Apache Tomcat 을 실행하여 서버를 오픈하세요.
+> apache-tomcat-{version}/bin/```startup.bat``` 을 실행하여 서버를 오픈합니다.  
+> apache-tomcat-{version}/bin/```shutdown.bat``` 을 실행하여 서버를 종료합니다.  
 
 
 ### 사용 예제
