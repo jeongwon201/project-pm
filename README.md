@@ -95,8 +95,7 @@
 ### 사용 예제
 
 _더 많은 예제와 사용법은 다음 링크를 참고하세요._
-
-- <a href="https://github.com/jeongwon201/project-pm/blob/main/readme/usage.md" target="_blank">포트폴리오 커머스 웹 애플리케이션(포 매) 사용 예제</a>
+- <a href="https://github.com/jeongwon201/project-pm/blob/develop/readme/usage.md" target="_blank">포트폴리오 커머스 웹 애플리케이션(포 매) 사용 예제</a>
 
 ## 업데이트 내역
 
